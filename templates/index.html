@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 align="center">Works log</h1>
+{% for i in js %}
+{% set teamlead = tl[i.id - 1] %}
+<h3>Action №{{i.id}}</h3>
+<table>
+<tr>
+  <th>Title of activity</th>
+  <th>Team leader</th>
+  <th>Duration</th>
+  <th>List of collaborators</th>
+  <th>Is finished</th>
+  </tr>
+ <tr>
+  <td>{{i.job}}</td>
+  <td>{{teamlead}}</td>
+  <td>{{i.work_hours}}</td>
+  <td>{{i.collaborators}}</td>
+  <td>{{i.is_finished}}</td>
+ </tr>
+</table>
+<br>
+{% endfor %}
+{% endblock %}
