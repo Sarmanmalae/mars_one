@@ -17,7 +17,6 @@ login_manager.init_app(app)
 
 def main():
     db_session.global_init("db/mars_explorer.db")
-    db_sess = db_session.create_session()
     app.run()
 
 
@@ -91,6 +90,24 @@ def login():
 def logout():
     logout_user()
     return redirect("/")
+
+
+@app.route('/addjob', methods=['GET', 'POST'])
+def addjob():
+    form = RegisterForm()
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        job = Jobs(
+            job=form.job.data,
+            team_leader=form.surname.data,
+            work_hours=form.work_hours.data,
+            collaborators=form.collaborators.data,
+            is_finished=form.is_finished.data
+        )
+        db_sess.add(job)
+        db_sess.commit()
+        return redirect('/')
+    return render_template('job_adding.html', title='Adding a job', form=form)
 
 
 if __name__ == '__main__':
