@@ -13,9 +13,14 @@
 <body>
     <header>
     <nav class="navbar navbar-light bg-light">
-        <a class="navbar-brand" href="#">Миссия Колонизация Марса</a>
+        <a class="navbar-brand" href="#" style="padding-left: 50px">Миссия Колонизация Марса</a>
         {% if current_user.is_authenticated %}
-            <a class="navbar-brand" href="/logout">{{ current_user.name }}</a>
+            <a class="navbar-brand" href="/logout" style="padding-right: 50px">{{ current_user.name }}</a>
+        {% else %}
+        <div class="btn-group" role="group" aria-label="Basic example" style="padding-right: 100px">
+            <a href="/register" class="btn btn-primary">Зарегестрироваться</a>
+            <a href="/login" class="btn btn-success">Войти</a>
+        </div>
         {% endif %}
     </nav>
     </header>

@@ -6,6 +6,7 @@ from data import db_session
 from data.jobs import Jobs
 from data.users import User
 from data.departments import Department
+from forms.Job_adding import JobAddingForm
 from forms.login import LoginForm
 from forms.register import RegisterForm
 
@@ -41,6 +42,15 @@ def main_page():
     return render_template('index.html', js=jobs, tl=teamleads)
 
 
+@app.route('/delete_job/<int:num>', methods=['GET', 'POST'])
+def delete(num):
+    db_sess = db_session.create_session()
+    job = db_sess.query(Jobs).filter(Jobs.id == num).first()
+    db_sess.delete(job)
+    db_sess.commit()
+    return redirect('/')
+
+
 @app.route('/register', methods=['GET', 'POST'])
 def reqister():
     form = RegisterForm()
@@ -70,6 +80,25 @@ def reqister():
     return render_template('register.html', title='Регистрация', form=form)
 
 
+@app.route('/edit_job/<int:num>', methods=['GET', 'POST'])
+def edit_job(num):
+    form = JobAddingForm()
+    db_sess = db_session.create_session()
+    if form.validate_on_submit():
+        job = db_sess.query(Jobs).filter(Jobs.id == num).first()
+        job.job = form.job.data
+        job.work_hours = form.work_hours.data
+        job.collaborators = form.collaborators.data
+        job.is_finished = form.is_finished.data
+        db_sess.commit()
+        return redirect('/')
+
+    job = db_sess.query(Jobs).filter(Jobs.id == num).first()
+    info = {'job': job.job, 'team_leader': job.team_leader, 'work_hours': job.work_hours,
+            'collaborators': job.collaborators, 'is_finsished': job.is_finished}
+    return render_template('edit_job.html', title='Editing a job', form=form, info=info)
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -94,12 +123,12 @@ def logout():
 
 @app.route('/addjob', methods=['GET', 'POST'])
 def addjob():
-    form = RegisterForm()
+    form = JobAddingForm()
     if form.validate_on_submit():
         db_sess = db_session.create_session()
         job = Jobs(
             job=form.job.data,
-            team_leader=form.surname.data,
+            team_leader=form.team_leader.data,
             work_hours=form.work_hours.data,
             collaborators=form.collaborators.data,
             is_finished=form.is_finished.data
