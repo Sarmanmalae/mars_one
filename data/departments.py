@@ -9,7 +9,7 @@ class Department(SqlAlchemyBase):
 
     id = sqlalchemy.Column(sqlalchemy.Integer,
                            primary_key=True, autoincrement=True)
-    cheif = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
+    chief = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
     title = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     members = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     email = sqlalchemy.Column(sqlalchemy.String,

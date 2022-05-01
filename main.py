@@ -6,6 +6,7 @@ from data import db_session
 from data.jobs import Jobs
 from data.users import User
 from data.departments import Department
+from forms.Dep_adding import DepartmentAddingForm
 from forms.Job_adding import JobAddingForm
 from forms.login import LoginForm
 from forms.register import RegisterForm
@@ -42,13 +43,56 @@ def main_page():
     return render_template('index.html', js=jobs, tl=teamleads)
 
 
+@app.route('/departments')
+def dp():
+    deps = []
+    chief = []
+    chiefs = []
+    db_sess = db_session.create_session()
+    for dep in db_sess.query(Department).all():
+        deps.append([dep.chief, dep.title, dep.members, dep.email, dep.id, dep.chief])
+        chief.append(dep.chief)
+    for i in range(len(deps)):
+        for user in db_sess.query(User).filter(User.id == deps[i][0]):
+            deps[i][0] = user.surname + ' ' + user.name
+    return render_template('departments.html', deps=deps)
+
+
+@app.route('/delete_department/<int:num>', methods=['GET', 'POST'])
+def delete_d(num):
+    db_sess = db_session.create_session()
+    dep = db_sess.query(Department).filter(Department.id == num).first()
+    db_sess.delete(dep)
+    db_sess.commit()
+    return redirect('/')
+
+
 @app.route('/delete_job/<int:num>', methods=['GET', 'POST'])
 def delete(num):
     db_sess = db_session.create_session()
     job = db_sess.query(Jobs).filter(Jobs.id == num).first()
     db_sess.delete(job)
     db_sess.commit()
-    return redirect('/')
+    return redirect('/departments')
+
+
+@app.route('/edit_department/<int:num>', methods=['GET', 'POST'])
+def edit_d(num):
+    form = DepartmentAddingForm()
+    db_sess = db_session.create_session()
+    if form.validate_on_submit():
+        dep = db_sess.query(Department).filter(Department.id == num).first()
+        dep.title = form.title.data
+        dep.chief = form.chief_id.data
+        dep.members = form.members.data
+        dep.email = form.email.data
+        db_sess.commit()
+        return redirect('/departments')
+
+    dp = db_sess.query(Department).filter(Department.id == num).first()
+    info = {'title': dp.title, 'chief_id': dp.chief, 'members': dp.members,
+            'email': dp.email}
+    return render_template('edit_department.html', title='Editing a job', form=form, info=info)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -137,6 +181,23 @@ def addjob():
         db_sess.commit()
         return redirect('/')
     return render_template('job_adding.html', title='Adding a job', form=form)
+
+
+@app.route('/add_department', methods=['GET', 'POST'])
+def add_d():
+    form = DepartmentAddingForm()
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        dep = Department(
+            title=form.title.data,
+            chief=form.chief_id.data,
+            members=form.members.data,
+            email=form.email.data,
+        )
+        db_sess.add(dep)
+        db_sess.commit()
+        return redirect('/departments')
+    return render_template('add_department.html', title='Adding a departament', form=form)
 
 
 if __name__ == '__main__':

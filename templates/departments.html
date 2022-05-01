@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 align="center">Departments log</h1>
+{% if current_user.is_authenticated %}
+<a href="/add_department" class="btn btn-secondary">Добавить департамент</a>
+<a href="/" class="btn btn-secondary">Вернуться обратно</a>
+{% endif %}
+{% for i in deps %}
+<h3>Action №{{i[-2]}}</h3>
+<table>
+    <tr>
+        <th>Title of department</th>
+        <th>Chief</th>
+        <th>Members</th>
+        <th>Department Email</th>
+    </tr>
+    <tr>
+        <td>{{i[1]}}</td>
+        <td>{{i[0]}}</td>
+        <td>{{i[2]}}</td>
+        <td style="background-color: #d8c2ff">{{i[3]}}</td>
+    </tr>
+</table>
+<br>
+{% if current_user.id == i[-1] or current_user.position.lower() in ['captain', 'капитан'] %}
+<a href="/edit_department/{{ i[-2] }}" class="btn btn-warning">Edit department</a>
+<a href="/delete_department/{{ i[-2] }}" class="btn btn-danger">Delete department</a>
+{% endif %}
+<br>
+<br>
+{% endfor %}
+{% endblock %}
