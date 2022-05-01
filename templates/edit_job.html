@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Adding a Job</h1>
+<h1>Editing a Job</h1>
 <form action="" method="post">
     {{ form.hidden_tag() }}
     <p>
@@ -17,6 +17,15 @@
         {{ form.team_leader.label }}<br>
         {{ form.team_leader(class="form-control", placeholder = info['team_leader']) }}<br>
         {% for error in form.team_leader.errors %}
+    <div class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+    {% endfor %}
+    </p>
+    <p>
+        {{ form.category.label }}<br>
+        {{ form.category(class="form-control", placeholder=hc) }}<br>
+        {% for error in form.category.errors %}
     <div class="alert alert-danger" role="alert">
         {{ error }}
     </div>

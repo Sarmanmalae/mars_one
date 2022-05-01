@@ -3,6 +3,7 @@ from flask_login import LoginManager, login_user, login_required, logout_user
 from werkzeug.utils import redirect
 
 from data import db_session
+from data.category import Category
 from data.jobs import Jobs
 from data.users import User
 from data.departments import Department
@@ -30,17 +31,20 @@ def load_user(user_id):
 
 @app.route('/')
 def main_page():
+    db_sess = db_session.create_session()
     jobs = []
     ids = []
     teamleads = []
-    db_sess = db_session.create_session()
+    cs = []
+
     for job in db_sess.query(Jobs).all():
         jobs.append(job)
+        cs.append(job.categories[0])
         ids.append(job.team_leader)
     for i in ids:
         for user in db_sess.query(User).filter(User.id.like(i)):
             teamleads.append(user.surname + ' ' + user.name)
-    return render_template('index.html', js=jobs, tl=teamleads)
+    return render_template('index.html', js=jobs, tl=teamleads, cs=cs)
 
 
 @app.route('/departments')
@@ -64,16 +68,17 @@ def delete_d(num):
     dep = db_sess.query(Department).filter(Department.id == num).first()
     db_sess.delete(dep)
     db_sess.commit()
-    return redirect('/')
+    return redirect('/departments')
 
 
 @app.route('/delete_job/<int:num>', methods=['GET', 'POST'])
 def delete(num):
     db_sess = db_session.create_session()
     job = db_sess.query(Jobs).filter(Jobs.id == num).first()
+    job.categories.remove(job.categories[0])
     db_sess.delete(job)
     db_sess.commit()
-    return redirect('/departments')
+    return redirect('/')
 
 
 @app.route('/edit_department/<int:num>', methods=['GET', 'POST'])
@@ -130,6 +135,9 @@ def edit_job(num):
     db_sess = db_session.create_session()
     if form.validate_on_submit():
         job = db_sess.query(Jobs).filter(Jobs.id == num).first()
+        job.categories.remove(job.categories[0])
+        c = db_sess.query(Category).filter(Category.num == form.category.data).first()
+        job.categories.append(c)
         job.job = form.job.data
         job.work_hours = form.work_hours.data
         job.collaborators = form.collaborators.data
@@ -140,7 +148,8 @@ def edit_job(num):
     job = db_sess.query(Jobs).filter(Jobs.id == num).first()
     info = {'job': job.job, 'team_leader': job.team_leader, 'work_hours': job.work_hours,
             'collaborators': job.collaborators, 'is_finsished': job.is_finished}
-    return render_template('edit_job.html', title='Editing a job', form=form, info=info)
+    hc = job.categories[0].num
+    return render_template('edit_job.html', title='Editing a job', form=form, info=info, hc=hc)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -178,6 +187,11 @@ def addjob():
             is_finished=form.is_finished.data
         )
         db_sess.add(job)
+        db_sess.commit()
+        db_sess = db_session.create_session()
+        c = db_sess.query(Category).filter(Category.num == form.category.data).first()
+        j = db_sess.query(Jobs).filter(Jobs.job == form.job.data).first()
+        j.categories.append(c)
         db_sess.commit()
         return redirect('/')
     return render_template('job_adding.html', title='Adding a job', form=form)

@@ -20,5 +20,7 @@ class Jobs(SqlAlchemyBase):
     end_date = sqlalchemy.Column(sqlalchemy.DateTime,
                                  default=datetime.datetime.now)
     is_finished = sqlalchemy.Column(sqlalchemy.Boolean, default=False, nullable=True)
-
+    categories = orm.relation("Category",
+                              secondary="association",
+                              backref="jobs")
     news = orm.relation("User")
