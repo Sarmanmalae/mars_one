@@ -9,8 +9,8 @@
 <br>
 <br>
 {% for i in js %}
-{% set teamlead = tl[i.id - 1] %}
-{% set category = cs[i.id - 1] %}
+{% set teamlead = tl[js.index(i)] %}
+{% set category = i.categories[0] %}
 <h3>Action №{{i.id}}</h3>
 <table>
     <tr>
@@ -35,7 +35,7 @@
     </tr>
 </table>
 <br>
-{% if current_user.is_authenticated and (teamlead.split()[1] == current_user.name or current_user.position.lower() in ['captain', 'капитан']) %}
+{% if current_user.is_authenticated and (i.creator == current_user.id or current_user.id == 1) %}
 <a href="/edit_job/{{ i.id }}" class="btn btn-warning">Edit job</a>
 <a href="/delete_job/{{ i.id }}" class="btn btn-danger">Delete</a>
 {% endif %}

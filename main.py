@@ -1,5 +1,5 @@
 from flask import Flask, render_template
-from flask_login import LoginManager, login_user, login_required, logout_user
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.utils import redirect
 
 from data import db_session
@@ -36,11 +36,11 @@ def main_page():
     ids = []
     teamleads = []
     cs = []
-
     for job in db_sess.query(Jobs).all():
         jobs.append(job)
         cs.append(job.categories[0])
         ids.append(job.team_leader)
+    print(cs)
     for i in ids:
         for user in db_sess.query(User).filter(User.id.like(i)):
             teamleads.append(user.surname + ' ' + user.name)
@@ -140,6 +140,7 @@ def edit_job(num):
         job.categories.append(c)
         job.job = form.job.data
         job.work_hours = form.work_hours.data
+        job.team_leader = form.team_leader.data
         job.collaborators = form.collaborators.data
         job.is_finished = form.is_finished.data
         db_sess.commit()
@@ -184,7 +185,8 @@ def addjob():
             team_leader=form.team_leader.data,
             work_hours=form.work_hours.data,
             collaborators=form.collaborators.data,
-            is_finished=form.is_finished.data
+            is_finished=form.is_finished.data,
+            creator=current_user.id
         )
         db_sess.add(job)
         db_sess.commit()
